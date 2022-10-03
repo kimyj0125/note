@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8"/>
+        <meta name="viewport" content="initial-scale=1.0, width=device-width">
+        <title>문제 관리</title>
+
+        <!-- 제이쿼리 모바일, 제이쿼리 라이브러리 파일 -->
+        <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css"/>
+        <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+        <script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+        <!-- 사용자 정의 자바스크립트 파일 -->
+        <script src="dbHandle.js"></script>
+        <script src="noteinfo.js"></script>
+        <style type="text/css">
+			#logo { display: block; margin: 50px auto; }
+			#abc {display:inline-block}
+			#abcd {display:inline-block}
+</style>
+        <script>
+        
+			$(document).ready(function() {
+				// DB 연결
+				openDB();
+				createTable();
+
+				// 이벤트 함수 정의
+				$(document).ready(function(){
+					shownote1();
+					});
+
+				$('#shownote').click(function() {
+					shownote1();
+				});
+
+				$('#submit1').click(function() {
+					insertnote();
+				});
+				$('#cancel1').click(function() {
+				$("#notePicture1").attr("src","");
+					
+				});
+				$('#search2').click(function() {
+					var name = $('#snoteName2').val();
+					selectnote2(name);
+				});
+				$('#submit2').click(function() {
+					updatenote();
+				});
+				$('#cancel2').click(function() {
+					$("#notePicture2").attr("src","");
+				});
+				$('#search3').click(function() {
+					var name = $('#snoteName3').val();
+					selectnote3(name);
+				});
+				$('#submit3').click(function() {
+					deletenote();
+				});
+				$('#search4').click(function() {
+					var name = $('#snoteName4').val();
+					selectnote4(name);
+				});
+
+				$('#first').click(function() {
+					position = 'first';
+					listnote();
+				});
+				$('#prev').click(function() {
+					position = 'prev';
+					listnote();
+				});
+				$('#next').click(function() {
+					position = 'next';
+					listnote();
+				});
+				$('#last').click(function() {
+					position = 'last';
+					listnote();
+				});
+				$('#btnPicShow').click(function() {
+					getnotePic();
+				});
+
+			});
+
+        </script>
+        <style type="text/css">
+			img {
+				padding: 10px;
+				margin: 10px 50px;
+			}
+			.gap {
+				padding-top: 15px;
+				padding-bottom: 30px;
+			}
+
+        </style>
+    </head>
+    <body>
+
+        <!-- 첫 화면 -->
+        <div data-role="page" id="page0">
+            <div data-role="header" data-position="fixed" data-theme="b">
+                <h1>공부 도우미</h1>
+                <a href="#page0" data-icon="home" data-iconpos="notext" class="ui-btn-right">Home</a>
+            </div>
+            <div data-role="content">
+                <img id="logo" src="plus.jpg">
+                <ul data-role="listview" data-inset="true">
+                    <li>
+                        <a href="#page1">오답노트 생성</a>
+                    </li>
+                    <li>
+                        <a href="#page2">오답노트 수정</a>
+                    </li>
+                    
+                    <li>
+                        <a href="#page4">오답노트 목록</a>
+                    </li>
+                </ul>
+            </div>
+
+            <div data-role="footer" data-position="fixed" data-theme="b">
+                <h4>W A NoteS 21</h4>
+            </div>
+        </div>
+
+        <!-- 문제 추가 화면 -->
+        <div data-role="page" id="page1">
+            <div data-role="header" data-position="fixed" data-theme="b">
+                <a href="#" data-icon="back" data-rel="back" data-direction="reverse">Back</a>
+                <h1>오답 노트</h1>
+                <a href="#page0" data-icon="home" data-iconpos="notext">Home</a>
+                <div data-role="navbar">
+                    <ul>
+                        <li>
+                            <a href="#page1">입력</a>
+                        </li>
+                        <li>
+                            <a href="#page2">수정</a>
+                        </li>
+
+                        <li>
+                            <a href="#page4" id="auto">목록</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div data-role="content">
+                <form name="form1">
+                    <h3>오답 추가</h3>
+                    <div class="ui-body ui-body-a gap">
+
+                        <label for="noteType1">과목:</label>
+                        <input type="text" name="noteType1" id="noteType1" value="" data-mini="true"/>
+                        <label for="noteName1">제목:</label>
+                        <input type="text" name="noteName1" id="noteName1" value="" data-mini="true"/>
+                        <label for="noteAnswer1" name="noteAnswer1">풀이: </label>
+                        <textarea cols="25" rows="5" name="noteAnswer1" id="noteAnswer1" data-mini="true"></textarea>                                                
+                        
+                        <br>
+                        
+						사진 첨부:
+						<input type="file" id="cd" onchange="previewFile()">
+                        <br>
+                        <img src="" height="200" alt="Image preview" id="notePicture1">
+                        <script>
+							function previewFile() {
+								var preview = document.getElementById("notePicture1");
+								var file = document.querySelector('input[type=file]').files[0];
+								var reader = new FileReader();
+								reader.addEventListener("load", function() {
+									preview.src = reader.result;
+								}, false);
+								if (file) {
+									reader.readAsDataURL(file);
+
+								}
+							}
+                        </script>
+
+                    </div>
+                    
+                    
+                    <div class="ui-body">
+                        <fieldset class="ui-grid-a">
+                            <div class="ui-block-a">
+                                <input type="reset" id="cancel1" value="취소"/>
+                            </div>
+                            <div class="ui-block-b">
+                                <input type="button" id="submit1" value="추가"/>
+                            </div>
+                        </fieldset>
+                    </div>
+                </form>
+            </div>
+            <div data-role="footer" data-position="fixed" data-theme="b">
+                <h4>W A NoteS 21</h4>
+            </div>
+        </div>
+
+        <!-- 문제 수정 및 삭제 화면 -->
+        <div data-role="page" id="page2">
+            <div data-role="header" data-position="fixed" data-theme="b">
+                <a href="#" data-icon="back" data-rel="back" data-direction="reverse">Back</a>
+                <h1>오답 노트</h1>
+                <a href="#page0" data-icon="home" data-iconpos="notext">Home</a>
+                <div data-role="navbar">
+                    <ul>
+                        <li>
+                            <a href="#page1">입력</a>
+                        </li>
+                        <li>
+                            <a href="#page2">수정</a>
+                        </li>
+
+                        <li>
+                            <a href="#page4">목록</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div data-role="content">
+                <form name="form2">
+                    <h4>노트 수정</h4>
+                    <div>
+                        <label for="snoteName2">제목으로 검색:</label>
+                        <input type="search" name="snoteName2" id="snoteName2" value="" data-mini="true"/>
+                         <div class="ui-block-c">
+                                <input type="button" id="search2" value="검색"/>
+                            </div>
+                           </div>
+                           <div class="ui-body ui-body-a gap">
+                        <label for="noteName2">제목:</label>
+						<input type="text" name="noteName2" id="noteName2" value="" data-mini="true"/>
+
+                        <label for="noteType2" class="select">과목:</label>
+                        <input name="noteType2" id="noteType2" data-native-menu="false" data-mini="true" data-inline="true">
+                        <label for="nnoteAnswer2" name="noteAnswer2">풀이: </label>
+                        <textarea cols="25" rows="5" name="noteAnswer2" id="noteAnswer2" data-mini="true"></textarea>
+                        <br>
+						사진 첨부:
+                        <input type="file" id="picselector2" onchange="previewFile2()">
+						<br>
+						<img src="" height="200" alt="Image preview" id="notePicture2">
+						<script>
+							function previewFile2() {
+								var preview = document.getElementById("notePicture2");
+								var file = document.querySelector('#picselector2').files[0];
+								var reader = new FileReader();
+								reader.addEventListener("load", function() {
+									preview.src = reader.result;
+								}, false);
+								if (file) {
+									reader.readAsDataURL(file);
+									
+								}
+							}
+						</script>
+
+                
+                
+ 				
+
+                    </div>
+
+                    <!--하단 버튼-->
+                    <div class="ui-body">
+                        <fieldset class="ui-grid-b">
+                            <div class="ui-block-a">
+                                <input type="reset" id="cancel2" value="취소"/>
+                            </div>
+                            <div class="ui-block-b">
+                                <input type="button" id="submit2" value="수정"/>
+                            </div>
+                            <div class="ui-block-b">
+                                <input type="button" id="submit3" value="삭제"/>
+                            </div>
+
+                        </fieldset>
+                    </div>
+                </form>
+            </div>
+            <div data-role="footer" data-position="fixed" data-theme="b">
+                <h4>W A NoteS 21</h4>
+            </div>
+        </div>
+
+        <!-- 전체 문제조회 화면 -->
+        <div data-role="page" id="page4">
+            <div data-role="header" data-position="fixed" data-theme="b">
+                <a href="#" data-icon="back" data-rel="back" data-direction="reverse">Back</a>
+                <h1>오답 노트</h1>
+                <a href="#page0" data-icon="home" data-iconpos="notext">Home</a>
+                <div data-role="navbar">
+                    <ul>
+                        <li>
+                            <a href="#page1">입력</a>
+                        </li>
+                        <li>
+                            <a href="#page2">수정</a>
+                        </li>
+
+                        <li>
+                            <a href="#page4">목록</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div data-role="content">
+                
+                <div class="ui-body ui-body-a gap">
+
+                    <div class="ui-body">
+                        
+                    </div>
+                    <ul data-role="listview" id="noteListArea" data-divider-theme="b" data-inset="true">
+                        <!-- 노트 리스트 표시 영역 -->
+                    </ul>
+                </div>
+            </div>
+
+            <div data-role="footer" data-position="fixed" data-theme="b">
+                <h4>W A NoteS 21</h4>
+            </div>
+        </div>
+        <div data-role="page" id="noteInfoShowPage" >
+            <div data-role="header" data-position="fixed" data-theme="b">
+                <a href="#" data-icon="back" data-rel="back" data-direction="reverse">Back</a>
+                <h1>오답노트</h1>
+                <a href="#page0" data-icon="home" data-iconpos="notext">Home</a>
+
+            </div>
+            <div data-role="content">
+                <div id="btnGroup">
+                    <span id="btnPicShow">
+                </div>
+                <div class="ui-body ui-body-a">
+                    <br/>
+                    <div  id="noteInfoArea">
+                        문제 정보 표시 영역
+                    </div>
+                </div>
+            </div>
+            <div data-role="footer" data-position="fixed" data-theme="b">
+                <h4>W A NoteS 21</h4>
+            </div>
+
+        </div>
+        
+
+        </div>
+    </body>
+</html>
